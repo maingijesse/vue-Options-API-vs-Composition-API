@@ -6,13 +6,13 @@
     <input
       type="text"
       placeholder="Add Todo"
-      v-model="newTodoName"
+      v-model="data.newTodoName"
       @keyup.enter="addTodo"
     />
   </div>
   <div>
     <ul>
-      <li v-for="(todo, index) in todos" :key="todo.id">
+      <li v-for="(todo, index) in data.todos" :key="todo.id">
         <span>{{ todo.name }}</span>
         <button @click="deleteTodo(index)">X</button>
       </li>
@@ -21,50 +21,54 @@
 </template>
 
 <script>
-import { ref, computed, watch } from "vue";
+import { computed, watch, reactive } from "vue";
 export default {
   setup() {
-    let todosCount = computed(() => {
-      return todos.value.length;
+    let data = reactive({
+      newTodoName: "",
+      todos: [
+        { id: 1, name: "Welcome the guests" },
+        { id: 2, name: "Make some bacon" },
+        { id: 3, name: "Go home" },
+      ],
     });
-    const swearWords = ["senzi", "ngo'mbe", "ndia"];
-    let newTodoName = ref("");
-    let todos = ref([
-      { id: 1, name: "Welcome the guests" },
-      { id: 2, name: "Make some bacon" },
-      { id: 3, name: "Go home" },
-    ]);
+    let todosCount = computed(() => {
+      return data.todos.length;
+    });
+    const swearWords = ["senzi", "ngo'mbe", "ndia"]; //this is not reactive so we can just use const
 
     function addTodo() {
       // console.log("Adding todo");
       let newTodo = {
         id: Date.now(),
-        name: newTodoName.value,
+        name: data.newTodoName,
       };
 
-      todos.value.push(newTodo);
+      data.todos.push(newTodo);
 
-      newTodoName.value = "";
+      data.newTodoName = "";
     }
 
     function deleteTodo(index) {
       // console.log(index);
-      todos.value.splice(index, 1);
+      data.todos.splice(index, 1);
     }
 
-    watch(newTodoName, (newValue) => {
+    watch(data, (newValue) => {
       // console.log(newValue);
+      //when using reactive the watch object changes. Compare the previous commit to this one
 
-      if (swearWords.includes(newValue.toLowerCase())) {
-        newTodoName.value = "";
-        alert(`You can never say "${newValue}"  man. That's not cool at all`);
+      if (swearWords.includes(newValue.newTodoName.toLowerCase())) {
+        alert(
+          `You can never say "${newValue.newTodoName}"  man. That's not cool at all`
+        );
+        data.newTodoName = "";
       }
     });
 
     return {
-      newTodoName,
       todosCount,
-      todos,
+      data,
       addTodo,
       deleteTodo,
     };
